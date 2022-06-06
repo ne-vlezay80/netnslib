@@ -66,3 +66,27 @@ remove_ns () {
         done
         ip netns del ${nsname}
 }
+
+carrier_test () {
+        IFACE=$1
+
+        if [[ -z ${IFACE} ]]; then
+                return 1
+        fi
+
+        data=$(ip link show dev $IFACE)
+
+        for a in $data; do
+                IFS=","
+                for b in $a; do
+                      if [[ "$a" =~ "NO-CARRIER" ]]; then
+                               return 10
+                      fi
+                      if [[ "$a" =~ "DOWN" ]]; then
+                                       return 11
+                       fi 
+                done
+                unset IFS
+        done
+        return 255
+}
